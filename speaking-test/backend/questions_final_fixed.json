@@ -1,0 +1,669 @@
+{
+  "mock_test_1": {
+    "title": "Speaking mock test 2",
+    "start_page": 8,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Do you live in a house or a flat?",
+          "Tell me about your first teacher.",
+          "What is your favorite food?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some advantages of traveling by train?",
+          "Why do some people prefer to travel by plane?"
+        ],
+        "pictures": [
+          "/images/page8_img1.png",
+          "/images/page9_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about a critical decision you have made.",
+          "How has this decision influenced you and your life?",
+          "What factors have the highest impact on the decisions people make?"
+        ],
+        "pictures": [
+          "/images/page10_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Reduces carbon emissions and pollution",
+          "Lowers dependency on fossil fuels"
+        ],
+        "Against": [
+          "High cost of electric vehicles and charging infrastructure",
+          "Production of batteries has its own environmental impact"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_2": {
+    "title": "Speaking mock test 3",
+    "start_page": 12,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "What do you usually eat for breakfast?",
+          "Tell me about your room.",
+          "Do you like doing any sports?"
+        ],
+        "pictures": [
+          "/images/page13_img1.png"
+        ]
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some of the advantages of doing sports indoors?",
+          "How do sports bring people together?"
+        ],
+        "pictures": [
+          "/images/page13_img1.png",
+          "/images/page14_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Describe a time when you faced a challenge.",
+          "What did you learn from this experience?",
+          "How can facing challenges help people grow?"
+        ],
+        "pictures": [
+          "/images/page14_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Increases employee productivity and satisfaction",
+          "Reduces commuting time and pollution"
+        ],
+        "Against": [
+          "Decreases team collaboration and bonding",
+          "Can lead to isolation and mental health issues"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_3": {
+    "title": "Speaking Mock Test 4",
+    "start_page": 16,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Please tell me about your best friend.",
+          "Tell me about your country.",
+          "What do you like to do in your free time?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some advantages of walking over driving?",
+          "Why do some people prefer having a car of their own?",
+          "Both images show different ways people commute in daily life.\""
+        ],
+        "pictures": [
+          "/images/page17_img1.png",
+          "/images/page18_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about a time when you disagreed with someone.",
+          "How did you handle the disagreement?",
+          "Why is it important to learn how to handle conflicts?"
+        ],
+        "pictures": [
+          "/images/page18_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Allows more time for extracurricular activities and rest",
+          "Reduces stress and burnout among students"
+        ],
+        "Against": [
+          "Reinforces learning and understanding of subjects",
+          "Helps teachers assess student progress"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_4": {
+    "title": "Speaking Mock Test 5",
+    "start_page": 20,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your favorite teacher.",
+          "Do you live in a house or a flat?",
+          "What do you like to do on weekends?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some of the advantages of driving a car?",
+          "Why do some people prefer to use public transportation?"
+        ],
+        "pictures": [
+          "/images/page20_img1.png",
+          "/images/page21_img1.png",
+          "/images/page22_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Describe a situation when you had to make a difficult choice.",
+          "What did you consider when making this choice?",
+          "Why is it sometimes hard for people to make decisions?"
+        ],
+        "pictures": [
+          "/images/page22_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Prevents animal abuse and exploitation",
+          "Promotes ethical treatment and respect for life"
+        ],
+        "Against": [
+          "Difficult to implement and enforce",
+          "Could affect industries like agriculture and research"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_5": {
+    "title": "Speaking Mock Test 6",
+    "start_page": 24,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Please tell me about your favorite food.",
+          "What do you usually do on weekends?",
+          "Describe your hometown."
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some of the challenges people face when they study online?",
+          "Do you think people learn better online or in classrooms?"
+        ],
+        "pictures": [
+          "/images/page25_img1.png",
+          "/images/page26_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Describe a piece of advice you have received.",
+          "How did this advice help you in your life?",
+          "Why is it important to listen to others' advice?"
+        ],
+        "pictures": [
+          "/images/page26_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Reduces hate speech and online harassment",
+          "Prevents the spread of misinformation"
+        ],
+        "Against": [
+          "Violates freedom of expression",
+          "Limits diverse viewpoints and healthy debate"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_6": {
+    "title": "Speaking Mock Test 7",
+    "start_page": 28,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Please tell me about your job or studies.",
+          "Tell me about your hometown.",
+          "Where do you like to go in your free time?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some advantages of shopping at a local farmers' market over a large supermarket?",
+          "Why do some people prefer shopping at large supermarkets?",
+          "What are some advantages of shopping at a local farmers' market over a large"
+        ],
+        "pictures": [
+          "/images/page29_img1.png",
+          "/images/page30_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about something you did in your life that was a success.",
+          "How did this success impact your life and the people around you?",
+          "What role do hard work, talent, and opportunity play in achieving success?"
+        ],
+        "pictures": [
+          "/images/page30_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Animals suffer from captivity and unnatural environments",
+          "Wildlife should live freely in their natural habitats",
+          "Educational value for children and adults"
+        ],
+        "Against": [
+          "Zoos contribute to conservation efforts and research"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_7": {
+    "title": "Speaking Mock Test 8",
+    "start_page": 32,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your house.",
+          "Do you have any pets?",
+          "What do you do to stay healthy?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What differences are there between shopping alone and shopping with other people?",
+          "Why do some people dislike bargaining?",
+          "However, shopping with friends or family can also lead to impulse buying or take more time, as"
+        ],
+        "pictures": [
+          "/images/page33_img1.png",
+          "/images/page34_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Describe the time when you shared a secret with another person.",
+          "Why did you think this person was reliable enough to tell your secret?",
+          "Can people who trust others too much get hurt?"
+        ],
+        "pictures": [
+          "/images/page34_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Protects children from harmful content"
+        ],
+        "Against": [
+          "Reduces the risk of cyberbullying and online addiction",
+          "Limits access to educational resources",
+          "Prevents children from learning digital literacy early"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_8": {
+    "title": "Speaking Mock Test 9",
+    "start_page": 36,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about a typical weekend for you.",
+          "What do you usually eat for breakfast?",
+          "What do you do to stay healthy?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are the advantages of shopping in supermarkets compared to open-air markets?",
+          "How can shopping habits reflect cultural differences?"
+        ],
+        "pictures": [
+          "/images/page37_img1.png",
+          "/images/page38_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Talk about a time you worked in a team.",
+          "What were the benefits of working together?",
+          "How can teamwork help achieve goals?"
+        ],
+        "pictures": [
+          "/images/page38_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Guns can help people protect themselves",
+          "They prevent people from becoming victims of crimes like burglary"
+        ],
+        "Against": [
+          "Guns are weapons that are used to commit a crime",
+          "Fewer guns will reduce the murder rate"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_9": {
+    "title": "Speaking Mock Test 10",
+    "start_page": 40,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your first teacher.",
+          "Do you live in a house or a flat?",
+          "What do you like to do in the evenings?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some advantages of traveling by train?",
+          "Why do some people prefer to travel by plane?"
+        ],
+        "pictures": [
+          "/images/page41_img1.png",
+          "/images/page42_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about the time when you shared a secret with another person.",
+          "How did you feel after sharing it?",
+          "How important is it to keep other people's secrets?"
+        ],
+        "pictures": [
+          "/images/page42_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Higher cost of fuel discourages driving",
+          "The revenue can be used for green initiatives"
+        ],
+        "Against": [
+          "It can be a burden on low-income families",
+          "It has limited effect on certain industries"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_10": {
+    "title": "Speaking Mock Test 11",
+    "start_page": 44,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your school.",
+          "What is your favorite season?",
+          "What do you usually do on weekends?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What benefits can people have by avoiding fast food?",
+          "Why do some people prefer to have unhealthy food?"
+        ],
+        "pictures": [
+          "/images/page45_img1.png",
+          "/images/page46_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about the time when you tried to do something but failed.",
+          "How did this failure impact your life and people around you?",
+          "Do you think accepting failure is an important part of personal growth?"
+        ],
+        "pictures": [
+          "/images/page46_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Reduces distractions and increases focus",
+          "Prevents cheating and misuse during exams",
+          "Useful for emergencies and communication"
+        ],
+        "Against": [
+          "Can be used as educational tools"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_11": {
+    "title": "Speaking Mock Test 12",
+    "start_page": 48,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your room.",
+          "What time do you usually get up?",
+          "What do you do to stay healthy?"
+        ],
+        "pictures": [
+          "/images/page49_img1.png"
+        ]
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some challenges people face while travelling by plane?",
+          "Do you think traveling makes people more open-minded?"
+        ],
+        "pictures": [
+          "/images/page49_img1.png",
+          "/images/page50_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "How has learning this skill been useful to you?",
+          "What skills do you think are most important to learn today?",
+          "Talk about a skill you have learned recently."
+        ],
+        "pictures": [
+          "/images/page50_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Helps people make informed dietary choices",
+          "Could reduce obesity rates"
+        ],
+        "Against": [
+          "Might not significantly affect eating habits",
+          "Can create anxiety around food choices"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_12": {
+    "title": "Speaking Mock Test 13",
+    "start_page": 52,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your favorite place in your city or town.",
+          "What do you usually have for breakfast?",
+          "What do you like to do on weekends?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are some of the biggest challenges people face in maintaining healthy eating habits?",
+          "How can we make sure everyone has access to enough healthy food?"
+        ],
+        "pictures": [
+          "/images/page53_img1.png",
+          "/images/page54_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Talk about a skill you have learned recently.",
+          "How has learning this skill been useful to you?",
+          "What skills do you think are most important to learn today?"
+        ],
+        "pictures": [
+          "/images/page54_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Promotes global communication and cooperation",
+          "Simplifies international trade and diplomacy"
+        ],
+        "Against": [
+          "Loss of cultural diversity and heritage",
+          "Impractical to enforce and adopt worldwide"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_13": {
+    "title": "Speaking Mock Test 14",
+    "start_page": 56,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Tell me about your house.",
+          "Do you go to bed early or late?",
+          "What is your favorite drink?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "What are the advantages of shopping in supermarkets compared to open-air markets?",
+          "Why do some people get excited about sales and discounts?.",
+          "Why do some people get excited about sales and discounts?"
+        ],
+        "pictures": [
+          "/images/page57_img1.png",
+          "/images/page58_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Describe the time when you felt happy about something.",
+          "Why do you think it was a significant event for you?",
+          "Is happiness relative, that is, does it have a different meaning for each person?"
+        ],
+        "pictures": [
+          "/images/page58_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Encourages more people to use eco-friendly transportation",
+          "Improves access for low-income individuals"
+        ],
+        "Against": [
+          "High cost of maintaining public transport systems without fare revenue",
+          "Overcrowding and misuse of services"
+        ],
+        "pictures": []
+      }
+    }
+  },
+  "mock_test_14": {
+    "title": "Speaking Mock Test 15",
+    "start_page": 60,
+    "parts": {
+      "Part 1.1": {
+        "questions": [
+          "Do you live in a house or a flat?",
+          "Tell me about your first teacher.",
+          "What is your favorite food?"
+        ],
+        "pictures": []
+      },
+      "Part 1.2": {
+        "questions": [
+          "What do you see in these pictures?",
+          "Which do you think offers a greater variety of exercise options: indoor or outdoor sports?",
+          "How can sports be made more accessible to everyone in society?"
+        ],
+        "pictures": [
+          "/images/page61_img1.png",
+          "/images/page62_img1.png"
+        ]
+      },
+      "Part 2": {
+        "questions": [
+          "Tell me about a goal you set for yourself.",
+          "How did you work towards achieving this goal?",
+          "Why is goal-setting important in life?"
+        ],
+        "pictures": [
+          "/images/page62_img1.png"
+        ]
+      },
+      "Part 3": {
+        "question": "What is your opinion about this topic?",
+        "For": [
+          "Reduces plastic pollution in oceans and landfills",
+          "Protects wildlife from plastic waste"
+        ],
+        "Against": [
+          "Some industries depend on single-use plastics",
+          "Transition period could affect the economy"
+        ],
+        "pictures": []
+      }
+    }
+  }
+}
