@@ -1,141 +1,122 @@
 import React, { useState, useEffect, useRef } from "react";
 
-function SpeechTest() {
-  const [test, setTest] = useState(null);
+function SpeakingTest() {
+  const [sessionId, setSessionId] = useState(null);
+  const [parts, setParts] = useState([]);
+  const [partIndex, setPartIndex] = useState(0);
   const [recording, setRecording] = useState(false);
-  const [transcription, setTranscription] = useState("");
-  const [response, setResponse] = useState("");
+  const [finalResult, setFinalResult] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // 📥 Загружаем случайный тест при загрузке страницы
   useEffect(() => {
-    fetch("http://localhost:5000/api/tests/random")
+    fetch("http://localhost:5000/api/start")
       .then((res) => res.json())
-      .then((data) => setTest(data))
+      .then((data) => {
+        setSessionId(data.sessionId);
+        setParts(data.parts);
+      })
       .catch((err) => console.error("Ошибка загрузки теста:", err));
   }, []);
 
-  // 🎤 Начать запись
   const startRecording = async () => {
-    setTranscription("");
-    setResponse("");
     setRecording(true);
-
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorderRef.current = new MediaRecorder(stream);
-
     audioChunksRef.current = [];
-    mediaRecorderRef.current.ondataavailable = (event) => {
-      audioChunksRef.current.push(event.data);
-    };
-
+    mediaRecorderRef.current.ondataavailable = (e) => audioChunksRef.current.push(e.data);
     mediaRecorderRef.current.onstop = handleStop;
     mediaRecorderRef.current.start();
   };
 
-  // 🛑 Остановить запись
   const stopRecording = () => {
     setRecording(false);
     mediaRecorderRef.current.stop();
   };
 
-  // 📤 Отправляем запись на backend
   const handleStop = async () => {
-    const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+    const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
     const formData = new FormData();
-    formData.append("audio", audioBlob, "speech.webm");
+    formData.append("audio", blob, "speech.webm");
+    formData.append("sessionId", sessionId);
+    formData.append("part", parts[partIndex].name);
 
     try {
       const res = await fetch("http://localhost:5000/api/speech", {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
-      setTranscription(data.transcription);
-      setResponse(data.feedback);
+
+      if (data.final) {
+        setFinalResult(data.final);
+      } else {
+        setPartIndex((prev) => prev + 1);
+      }
     } catch (err) {
-      console.error("Ошибка при отправке аудио:", err);
+      console.error("Ошибка отправки аудио:", err);
     }
   };
 
+  if (!parts.length) return <p>Загрузка...</p>;
+  const currentPart = parts[partIndex];
+
   return (
     <div style={{ padding: 20 }}>
-      <h2>🎤 English Speaking Test</h2>
+      <h2>🎤 English Speaking Mock Test</h2>
+      <h3>{currentPart?.name}</h3>
 
-      {/* 📌 Вопросы и картинки */}
-      {test && (
-        <>
-          <h3>{test.title}</h3>
-          {Object.entries(test.parts).map(([partName, part]) => (
-            <div key={partName} style={{ marginBottom: "20px" }}>
-              <h4>{partName}</h4>
+      {/* Вопросы */}
+      {currentPart?.payload?.questions?.map((q, i) => <p key={i}>❓ {q}</p>)}
+      {currentPart?.payload?.question && <p>❓ {currentPart.payload.question}</p>}
 
-              {/* Вопросы */}
-              {part.questions &&
-                part.questions.map((q, i) => <p key={i}>❓ {q}</p>)}
-
-              {/* Фото */}
-              {part.pictures &&
-                part.pictures.map((pic, i) => (
-                  <img
-                    key={i}
-                    src={`http://localhost:5000${pic}`}
-                    alt={`pic-${i}`}
-                    width="200"
-                    style={{ margin: "10px" }}
-                  />
-                ))}
-
-              {/* Part 3 — вопрос + аргументы */}
-              {part.question && <p><b>❓ {part.question}</b></p>}
-              {part.For && (
-                <>
-                  <p>✅ For:</p>
-                  <ul>
-                    {part.For.map((f, i) => (
-                      <li key={i}>{f}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {part.Against && (
-                <>
-                  <p>❌ Against:</p>
-                  <ul>
-                    {part.Against.map((a, i) => (
-                      <li key={i}>{a}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          ))}
-        </>
-      )}
-
-      {/* 🎙️ Кнопка записи */}
-      <button onClick={recording ? stopRecording : startRecording}>
-        {recording ? "🛑 Stop Recording" : "🎙️ Start Recording"}
-      </button>
-
-      {/* Результаты */}
-      {transcription && (
+      {/* For/Against (Part 3) */}
+      {currentPart?.payload?.For && (
         <div>
-          <h3>📝 Ваш текст:</h3>
-          <p>{transcription}</p>
+          <h4>For:</h4>
+          <ul>{currentPart.payload.For.map((f, i) => <li key={i}>✅ {f}</li>)}</ul>
+        </div>
+      )}
+      {currentPart?.payload?.Against && (
+        <div>
+          <h4>Against:</h4>
+          <ul>{currentPart.payload.Against.map((a, i) => <li key={i}>❌ {a}</li>)}</ul>
         </div>
       )}
 
-      {response && (
-        <div>
-          <h3>📊 Оценка уровня:</h3>
-          <p>{response}</p>
+      {/* Картинки */}
+      {currentPart?.payload?.pictures?.map((pic, i) => (
+        <img key={i} src={`http://localhost:5000${pic}`} alt="" width="200" style={{ margin: "10px" }} />
+      ))}
+
+      {/* Кнопка записи */}
+      <button
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: recording ? "red" : "green",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+        onClick={recording ? stopRecording : startRecording}
+      >
+        {recording ? "🛑 Stop Recording" : "🎙️ Answer"}
+      </button>
+
+      {/* Итог */}
+      {finalResult && (
+        <div style={{ marginTop: 30 }}>
+          <h3>📊 Final Result:</h3>
+          <p>Level: {finalResult.level}</p>
+          <p>{finalResult.explanation}</p>
+          <p>💡 {finalResult.tip}</p>
         </div>
       )}
     </div>
   );
 }
 
-export default SpeechTest;
+export default SpeakingTest;
+
