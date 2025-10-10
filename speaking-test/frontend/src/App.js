@@ -12,7 +12,9 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setSessionId(data.sessionId);
-        setParts(data.parts);
+
+        // ✅ Просто сохраняем массив частей, как есть
+        setParts(data.parts || []);
       })
       .catch((err) => console.error("Ошибка загрузки теста:", err));
   }, []);
@@ -22,7 +24,7 @@ function App() {
     formData.append("audio", blob, "speech.webm");
     formData.append("sessionId", sessionId);
     formData.append("part", partName);
-    formData.append("qIndex", qIndex); // 👈 теперь передаем номер вопроса
+    formData.append("qIndex", qIndex);
 
     const res = await fetch("http://localhost:5000/api/speech", {
       method: "POST",
@@ -47,7 +49,9 @@ function App() {
     return (
       <div style={{ padding: 20 }}>
         <h2>📊 Final Result</h2>
-        <p><b>Level:</b> {finalResult.level}</p>
+        <p>
+          <b>Level:</b> {finalResult.level}
+        </p>
         <p>{finalResult.explanation}</p>
         <p>💡 {finalResult.tip}</p>
       </div>
@@ -56,11 +60,17 @@ function App() {
 
   if (!parts.length) return <p>Загрузка...</p>;
 
+  const part = parts[currentPart];
+  const payload = part.payload || {}; // 👈 исправление — теперь данные берутся отсюда
+
   return (
     <SpeechTest
-      partName={parts[currentPart].name}
-      questions={parts[currentPart].payload.questions || []}
-      pictures={parts[currentPart].payload.pictures || []} // 👈 добавил сюда
+      partName={part.name}
+      questions={payload.questions || []}
+      pictures={payload.pictures || []}
+      question={payload.question} // 👈 для Part 3
+      forList={payload.For || []} // 👈 для Part 3
+      againstList={payload.Against || []} // 👈 для Part 3
       onAnswerComplete={handleAnswer}
       onPartComplete={handlePartComplete}
     />
@@ -68,4 +78,3 @@ function App() {
 }
 
 export default App;
-
