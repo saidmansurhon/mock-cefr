@@ -1,13 +1,12 @@
-// backend/index.js
 import express from "express";
 import cors from "cors";
 import multer from "multer";
 import fs from "fs";
-import path from "path";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import OpenAI from "openai";
 import crypto from "crypto";
+import { MongoClient, GridFSBucket } from "mongodb";
 
 dotenv.config();
 
@@ -16,30 +15,65 @@ const port = process.env.PORT || 5000;
 
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
-app.use("/images", express.static(path.join(process.cwd(), "public/images")));
 
-// --- Загружаем JSON с тестами
-const testsPath = path.join(process.cwd(), "questions_final_fixed.json");
-const tests = fs.existsSync(testsPath) ? JSON.parse(fs.readFileSync(testsPath, "utf-8")) : {};
-const testKeys = Object.keys(tests);
-const TEST_KEY = testKeys.length > 0 ? testKeys[0] : null;
-const FIXED_TEST = TEST_KEY ? tests[TEST_KEY] : null;
-
-const sessions = {};
 const upload = multer({ dest: "uploads/" });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// ============================
+// 📦 Подключение MongoDB
+// ============================
+const mongoUri = process.env.MONGO_URI;
+const client = new MongoClient(mongoUri);
+let testsCollection;
+let bucket;
+
+async function connectDB() {
+  try {
+    await client.connect();
+    const db = client.db("cefr_speaking");
+    testsCollection = db.collection("tests");
+    bucket = new GridFSBucket(db, { bucketName: "pictures" });
+    console.log("✅ Подключено к MongoDB Atlas");
+  } catch (err) {
+    console.error("❌ Ошибка подключения к MongoDB:", err);
+  }
+}
+connectDB();
+
+// ============================
+// 📷 Раздача картинок из GridFS
+// ============================
+app.get("/images/:filename", (req, res) => {
+  try {
+    const downloadStream = bucket.openDownloadStreamByName(req.params.filename);
+    res.set("Content-Type", "image/png");
+
+    downloadStream.on("error", () => {
+      res.status(404).json({ error: "Image not found" });
+    });
+
+    downloadStream.pipe(res);
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка при загрузке изображения" });
+  }
 });
 
-// --- Deepgram transcription helper
+// ============================
+// 🔑 API ключи
+// ============================
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// 🎧 Deepgram — распознавание речи
 async function transcribeWithDeepgram(filePath) {
   const stream = fs.createReadStream(filePath);
   const resp = await fetch("https://api.deepgram.com/v1/listen", {
     method: "POST",
-    headers: { Authorization: `Token ${process.env.DEEPGRAM_API_KEY}` },
+    headers: {
+      Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
+      "Content-Type": "audio/webm",
+    },
     body: stream,
   });
+
   if (!resp.ok) {
     const txt = await resp.text();
     throw new Error(`Deepgram error ${resp.status}: ${txt}`);
@@ -47,44 +81,54 @@ async function transcribeWithDeepgram(filePath) {
   return await resp.json();
 }
 
-// ----------------------
-// API: старт теста
-// ----------------------
-app.get("/api/start", (req, res) => {
-  if (!FIXED_TEST) {
-    return res.status(500).json({ error: "No tests available on server." });
+// ============================
+// 🧠 Сессии
+// ============================
+const sessions = {};
+
+// ============================
+// 🎬 API: старт теста
+// ============================
+app.get("/api/start", async (req, res) => {
+  try {
+    const count = await testsCollection.countDocuments();
+    if (count === 0) return res.status(404).json({ error: "No tests in database." });
+
+    const randomIndex = Math.floor(Math.random() * count);
+    const testCursor = await testsCollection.find().skip(randomIndex).limit(1).toArray();
+    const test = testCursor[0];
+
+    if (!test?.parts) {
+      return res.status(500).json({ error: "Invalid test format in database" });
+    }
+
+    const sessionId = crypto.randomUUID();
+    const parts = Object.entries(test.parts).map(([name, payload]) => ({
+      name,
+      payload,
+    }));
+
+    sessions[sessionId] = {
+      answers: {}, // теперь по вопросам
+      received: 0,
+      total: parts.reduce((acc, p) => acc + (p.payload.questions?.length || 0), 0), // общее кол-во вопросов
+      createdAt: Date.now(),
+      testTitle: test.title,
+    };
+
+    res.json({ sessionId, testTitle: test.title, parts });
+  } catch (err) {
+    console.error("Ошибка /api/start:", err);
+    res.status(500).json({ error: "Ошибка при загрузке теста" });
   }
-
-  const sessionId = crypto.randomUUID();
-
-  // 🔹 Жёстко берём только то, что есть в JSON
-  const parts = Object.entries(FIXED_TEST.parts).map(([name, payload]) => ({
-    name,
-    payload: {
-      questions: payload.questions || [],
-      question: payload.question || null,
-      For: payload.For || [],
-      Against: payload.Against || [],
-      pictures: Array.isArray(payload.pictures) ? [...payload.pictures] : [],
-    },
-  }));
-
-  sessions[sessionId] = {
-    answers: {},
-    received: 0,
-    total: parts.length,
-    createdAt: Date.now(),
-  };
-
-  res.json({ sessionId, testTitle: FIXED_TEST.title || TEST_KEY, parts });
 });
 
-// ----------------------
-// API: приём аудио
-// ----------------------
+// ============================
+// 🎤 API: загрузка аудио (ответ на вопрос)
+// ============================
 app.post("/api/speech", upload.single("audio"), async (req, res) => {
   try {
-    const { sessionId, part } = req.body;
+    const { sessionId, part, qIndex } = req.body;
     if (!sessionId || !part) return res.status(400).json({ error: "sessionId and part are required" });
     if (!sessions[sessionId]) return res.status(400).json({ error: "Invalid sessionId" });
     if (!req.file) return res.status(400).json({ error: "Audio file is required" });
@@ -98,44 +142,51 @@ app.post("/api/speech", upload.single("audio"), async (req, res) => {
     }
 
     const transcript = dgJson.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
-    sessions[sessionId].answers[part] = transcript;
-    sessions[sessionId].received += 1;
 
+    if (!sessions[sessionId].answers[part]) {
+      sessions[sessionId].answers[part] = [];
+    }
+    sessions[sessionId].answers[part].push({
+      qIndex: Number(qIndex),
+      answer: transcript,
+    });
+
+    sessions[sessionId].received += 1;
     try { fs.unlinkSync(req.file.path); } catch {}
 
     if (sessions[sessionId].received < sessions[sessionId].total) {
       return res.json({ ok: true, transcription: transcript });
     }
 
-    // 🔹 Итоговая оценка
-    const orderedParts = Object.entries(FIXED_TEST.parts).map(([name]) => name);
+    // если все вопросы пройдены → собираем результат
+    const test = await testsCollection.findOne({ title: sessions[sessionId].testTitle });
+    const orderedParts = Object.entries(test.parts).map(([name]) => name);
+
     const combined = orderedParts
-      .map((pn) => `--- ${pn} ---\nQuestion(s): ${JSON.stringify(FIXED_TEST.parts[pn])}\nAnswer: ${sessions[sessionId].answers[pn] || ""}`)
+      .map((pn) => {
+        const qs = test.parts[pn].questions || [];
+        const ans = sessions[sessionId].answers[pn] || [];
+        return `--- ${pn} ---\nQuestions: ${JSON.stringify(qs)}\nAnswers: ${JSON.stringify(ans)}`;
+      })
       .join("\n\n");
 
     const systemPrompt = `
 You are an experienced English teacher and CEFR rater.
 You will receive the student's answers to a multi-part speaking test.
 Provide a JSON object with EXACT fields: level, explanation, tip.
-    `.trim();
+`.trim();
 
     const userPrompt = `Student responses:\n\n${combined}`;
 
-    let chatResponse;
-    try {
-      chatResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 500,
-      });
-    } catch (err) {
-      delete sessions[sessionId];
-      return res.status(500).json({ error: "OpenAI error", detail: String(err) });
-    }
+    const chatResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.2,
+      max_tokens: 500,
+    });
 
     const aiText = chatResponse.choices?.[0]?.message?.content || "";
     let parsed;
@@ -146,15 +197,17 @@ Provide a JSON object with EXACT fields: level, explanation, tip.
     }
 
     delete sessions[sessionId];
-    return res.json({ final: parsed, raw: aiText });
+    res.json({ final: parsed, raw: aiText });
   } catch (err) {
-    return res.status(500).json({ error: String(err) });
+    console.error("Ошибка /api/speech:", err);
+    res.status(500).json({ error: String(err) });
   }
 });
 
-// ----------------------
+// ============================
+// 🚀 Запуск сервера
+// ============================
 app.listen(port, () => {
-  console.log(`✅ Backend запущен: http://localhost:${port}`);
+  console.log(`✅ Сервер запущен: http://localhost:${port}`);
 });
-
 

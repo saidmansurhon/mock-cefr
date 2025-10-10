@@ -8,8 +8,8 @@
           "Do you live in a house or a flat?",
           "Tell me about your first teacher.",
           "What is your favorite food?"
-        ],
-        "pictures": []
+        ]
+        
       },
       "Part 1.2": {
         "questions": [
@@ -41,8 +41,8 @@
         "Against": [
           "High cost of electric vehicles and charging infrastructure",
           "Production of batteries has its own environmental impact"
-        ],
-        "pictures": []
+        ]
+        
       }
     }
   },

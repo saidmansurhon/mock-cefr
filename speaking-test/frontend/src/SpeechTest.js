@@ -1,122 +1,255 @@
 import React, { useState, useEffect, useRef } from "react";
 
-function SpeakingTest() {
-  const [sessionId, setSessionId] = useState(null);
-  const [parts, setParts] = useState([]);
-  const [partIndex, setPartIndex] = useState(0);
-  const [recording, setRecording] = useState(false);
-  const [finalResult, setFinalResult] = useState(null);
+export default function SpeechTest({
+  partName,
+  questions = [],
+  pictures = [],
+  onAnswerComplete,
+  onPartComplete,
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [phase, setPhase] = useState("idle"); // idle | prep | answer
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [totalTime, setTotalTime] = useState(0);
+
+  const timerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
+  const streamRef = useRef(null);
+  const chunksRef = useRef([]);
+  const beepRef = useRef(null);
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/start")
-      .then((res) => res.json())
-      .then((data) => {
-        setSessionId(data.sessionId);
-        setParts(data.parts);
-      })
-      .catch((err) => console.error("Ошибка загрузки теста:", err));
-  }, []);
-
-  const startRecording = async () => {
-    setRecording(true);
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorderRef.current = new MediaRecorder(stream);
-    audioChunksRef.current = [];
-    mediaRecorderRef.current.ondataavailable = (e) => audioChunksRef.current.push(e.data);
-    mediaRecorderRef.current.onstop = handleStop;
-    mediaRecorderRef.current.start();
-  };
-
-  const stopRecording = () => {
-    setRecording(false);
-    mediaRecorderRef.current.stop();
-  };
-
-  const handleStop = async () => {
-    const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-    const formData = new FormData();
-    formData.append("audio", blob, "speech.webm");
-    formData.append("sessionId", sessionId);
-    formData.append("part", parts[partIndex].name);
-
-    try {
-      const res = await fetch("http://localhost:5000/api/speech", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (data.final) {
-        setFinalResult(data.final);
-      } else {
-        setPartIndex((prev) => prev + 1);
-      }
-    } catch (err) {
-      console.error("Ошибка отправки аудио:", err);
+  // --- очистка таймера
+  const clearTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
   };
 
-  if (!parts.length) return <p>Загрузка...</p>;
-  const currentPart = parts[partIndex];
+  // --- запуск стабильного таймера
+  const startTimer = (seconds, onDone) => {
+    clearTimer();
+    const endTime = Date.now() + seconds * 1000;
+
+    setTotalTime(seconds);
+    setTimeLeft(seconds);
+
+    timerRef.current = setInterval(() => {
+      const diff = Math.round((endTime - Date.now()) / 1000);
+      if (diff <= 0) {
+        clearTimer();
+        setTimeLeft(0);
+        if (onDone) onDone();
+      } else {
+        setTimeLeft(diff);
+      }
+    }, 1000);
+  };
+
+  // --- стоп микрофона
+  const stopMediaTracks = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  };
+
+  // --- beep
+  const playBeep = async () => {
+    try {
+      if (!beepRef.current) beepRef.current = new Audio("/beep.mp3");
+      await beepRef.current.play();
+    } catch {}
+  };
+
+  // --- подготовка
+  const startPreparation = (index = currentIndex) => {
+    if (phase !== "idle") return;
+    setPhase("prep");
+
+    let prepTime = 5;
+    if (partName === "1.2" && index === 0) prepTime = 10;
+    if (partName === "2" || partName === "3") prepTime = 60;
+
+    startTimer(prepTime, () => startRecording(index));
+  };
+
+  // --- запись
+  const startRecording = async (index = currentIndex) => {
+    setPhase("answer");
+    chunksRef.current = [];
+
+    await playBeep();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size) chunksRef.current.push(e.data);
+      };
+
+      mr.onstop = async () => {
+        setPhase("idle");
+        stopMediaTracks();
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+
+        try {
+          await onAnswerComplete(blob, partName, index);
+        } catch (err) {
+          console.error("onAnswerComplete error:", err);
+        }
+
+        if (index < questions.length - 1) {
+          const next = index + 1;
+          setCurrentIndex(next);
+          setTimeout(() => startPreparation(next), 250);
+        } else {
+          if (onPartComplete) onPartComplete();
+        }
+      };
+
+      mr.start();
+
+      let answerTime = 30;
+      if (partName === "1.2" && index === 0) answerTime = 45;
+      if (partName === "2" || partName === "3") answerTime = 120;
+
+      startTimer(answerTime, () => {
+        if (mediaRecorderRef.current?.state === "recording") {
+          mediaRecorderRef.current.stop();
+        }
+      });
+    } catch (err) {
+      console.error("Microphone error:", err);
+      setPhase("idle");
+      stopMediaTracks();
+      clearTimer();
+    }
+  };
+
+  // --- ручной стоп
+  const manualStop = () => {
+    clearTimer();
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    } else {
+      setPhase("idle");
+    }
+  };
+
+  // --- очистка при размонтировании
+  useEffect(() => {
+    return () => {
+      clearTimer();
+      if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+      stopMediaTracks();
+    };
+  }, []);
+
+  const question = questions[currentIndex] || "Вопрос отсутствует";
+  const progressPercent =
+    totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>🎤 English Speaking Mock Test</h2>
-      <h3>{currentPart?.name}</h3>
+    <div style={{ maxWidth: 720, margin: "0 auto", padding: 16 }}>
+      <h2>Part {partName}</h2>
+      <h3>{question}</h3>
 
-      {/* Вопросы */}
-      {currentPart?.payload?.questions?.map((q, i) => <p key={i}>❓ {q}</p>)}
-      {currentPart?.payload?.question && <p>❓ {currentPart.payload.question}</p>}
-
-      {/* For/Against (Part 3) */}
-      {currentPart?.payload?.For && (
-        <div>
-          <h4>For:</h4>
-          <ul>{currentPart.payload.For.map((f, i) => <li key={i}>✅ {f}</li>)}</ul>
-        </div>
-      )}
-      {currentPart?.payload?.Against && (
-        <div>
-          <h4>Against:</h4>
-          <ul>{currentPart.payload.Against.map((a, i) => <li key={i}>❌ {a}</li>)}</ul>
-        </div>
-      )}
-
-      {/* Картинки */}
-      {currentPart?.payload?.pictures?.map((pic, i) => (
-        <img key={i} src={`http://localhost:5000${pic}`} alt="" width="200" style={{ margin: "10px" }} />
-      ))}
-
-      {/* Кнопка записи */}
-      <button
+      {/* картинки */}
+  {pictures && pictures.length > 0 && (
+  <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
+    {pictures.map((src, i) => (
+      <img
+        key={i}
+        src={src}
+        alt={`pic${i}`}
         style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          backgroundColor: recording ? "red" : "green",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
+          width: "200px",
+          height: "auto",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
         }}
-        onClick={recording ? stopRecording : startRecording}
-      >
-        {recording ? "🛑 Stop Recording" : "🎙️ Answer"}
-      </button>
+      />
+    ))}
+  </div>
+)}
 
-      {/* Итог */}
-      {finalResult && (
-        <div style={{ marginTop: 30 }}>
-          <h3>📊 Final Result:</h3>
-          <p>Level: {finalResult.level}</p>
-          <p>{finalResult.explanation}</p>
-          <p>💡 {finalResult.tip}</p>
+
+      {/* прогрессбар */}
+      <div
+        style={{
+          position: "relative",
+          height: 24,
+          background: "#eee",
+          borderRadius: 12,
+          overflow: "hidden",
+          margin: "16px 0",
+        }}
+      >
+        <div
+          style={{
+            width: `${progressPercent}%`,
+            height: "100%",
+            background: phase === "prep" ? "#ff9800" : "#4caf50",
+            transition: "width 1s linear",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontWeight: "bold",
+            lineHeight: "24px",
+          }}
+        >
+          {timeLeft > 0
+            ? `${timeLeft}s`
+            : phase === "prep"
+            ? "Prep"
+            : phase === "answer"
+            ? "Rec"
+            : "Ready"}
         </div>
+      </div>
+
+      {/* кнопки */}
+      {phase === "idle" && (
+        <button
+          onClick={() => startPreparation(currentIndex)}
+          style={{
+            padding: "12px 20px",
+            background: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+          }}
+        >
+          ▶️ Start
+        </button>
       )}
+      {(phase === "prep" || phase === "answer") && (
+        <button
+          onClick={manualStop}
+          style={{
+            padding: "12px 20px",
+            background: "#d32f2f",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+          }}
+        >
+          ⏹ Stop
+        </button>
+      )}
+
+      <div style={{ marginTop: 12, fontSize: 14, color: "#555" }}>
+        Question {currentIndex + 1} / {questions.length}
+      </div>
     </div>
   );
 }
-
-export default SpeakingTest;
-
