@@ -87,7 +87,7 @@ async function transcribeWithDeepgram(filePath) {
 const sessions = {};
 
 // ============================
-// 🎬 API: старт теста
+// 🎬 API: старт теста (исправлено под новую структуру)
 // ============================
 app.get("/api/start", async (req, res) => {
   try {
@@ -103,15 +103,27 @@ app.get("/api/start", async (req, res) => {
     }
 
     const sessionId = crypto.randomUUID();
-    const parts = Object.entries(test.parts).map(([name, payload]) => ({
-      name,
-      payload,
-    }));
+
+    // ✅ Новая структура
+    const parts = Object.entries(test.parts).map(([name, payload]) => {
+      return {
+        name,
+        questions: payload.questions || (payload.question ? [payload.question] : []),
+        pictures: payload.pictures || [],
+        For: payload.For || [],
+        Against: payload.Against || [],
+      };
+    });
+
+    const totalQuestions = parts.reduce(
+      (acc, p) => acc + (p.questions?.length || 0),
+      0
+    );
 
     sessions[sessionId] = {
-      answers: {}, // теперь по вопросам
+      answers: {},
       received: 0,
-      total: parts.reduce((acc, p) => acc + (p.payload.questions?.length || 0), 0), // общее кол-во вопросов
+      total: totalQuestions,
       createdAt: Date.now(),
       testTitle: test.title,
     };
@@ -164,7 +176,9 @@ app.post("/api/speech", upload.single("audio"), async (req, res) => {
 
     const combined = orderedParts
       .map((pn) => {
-        const qs = test.parts[pn].questions || [];
+        const qs =
+          test.parts[pn].questions ||
+          (test.parts[pn].question ? [test.parts[pn].question] : []);
         const ans = sessions[sessionId].answers[pn] || [];
         return `--- ${pn} ---\nQuestions: ${JSON.stringify(qs)}\nAnswers: ${JSON.stringify(ans)}`;
       })
@@ -210,4 +224,3 @@ Provide a JSON object with EXACT fields: level, explanation, tip.
 app.listen(port, () => {
   console.log(`✅ Сервер запущен: http://localhost:${port}`);
 });
-

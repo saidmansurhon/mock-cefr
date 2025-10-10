@@ -12,7 +12,9 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setSessionId(data.sessionId);
-        setParts(data.parts);
+
+        // ✅ Просто сохраняем массив частей, как есть
+        setParts(data.parts || []);
       })
       .catch((err) => console.error("Ошибка загрузки теста:", err));
   }, []);
@@ -45,7 +47,9 @@ function App() {
     return (
       <div style={{ padding: 20 }}>
         <h2>📊 Final Result</h2>
-        <p><b>Level:</b> {finalResult.level}</p>
+        <p>
+          <b>Level:</b> {finalResult.level}
+        </p>
         <p>{finalResult.explanation}</p>
         <p>💡 {finalResult.tip}</p>
       </div>
@@ -55,6 +59,7 @@ function App() {
   if (!parts.length) return <p>Загрузка...</p>;
 
   const part = parts[currentPart];
+
   const payload = part.payload || {};
 
   // 🔹 Универсальная логика для разных структур
@@ -85,6 +90,21 @@ function App() {
   onPartComplete={handlePartComplete}
 />
 
+
+  const payload = part.payload || {}; // 👈 исправление — теперь данные берутся отсюда
+
+  return (
+    <SpeechTest
+      partName={part.name}
+      questions={payload.questions || []}
+      pictures={payload.pictures || []}
+      question={payload.question} // 👈 для Part 3
+      forList={payload.For || []} // 👈 для Part 3
+      againstList={payload.Against || []} // 👈 для Part 3
+      onAnswerComplete={handleAnswer}
+      onPartComplete={handlePartComplete}
+    />
+ 
   );
 }
 
