@@ -6,6 +6,7 @@ export default function SpeechTest({
   pictures = [],
   onAnswerComplete,
   onPartComplete,
+  extraData = {}, // 👈 сюда можно передавать For/Against
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState("idle"); // idle | prep | answer
@@ -30,7 +31,6 @@ export default function SpeechTest({
   const startTimer = (seconds, onDone) => {
     clearTimer();
     const endTime = Date.now() + seconds * 1000;
-
     setTotalTime(seconds);
     setTimeLeft(seconds);
 
@@ -69,7 +69,7 @@ export default function SpeechTest({
 
     let prepTime = 5;
     if (partName === "1.2" && index === 0) prepTime = 10;
-    if (partName === "2" || partName === "3") prepTime = 60;
+    if (partName === "2" || partName === "3" || partName.includes("Part 3")) prepTime = 60;
 
     startTimer(prepTime, () => startRecording(index));
   };
@@ -115,7 +115,7 @@ export default function SpeechTest({
 
       let answerTime = 30;
       if (partName === "1.2" && index === 0) answerTime = 45;
-      if (partName === "2" || partName === "3") answerTime = 120;
+      if (partName === "2" || partName === "3" || partName.includes("Part 3")) answerTime = 120;
 
       startTimer(answerTime, () => {
         if (mediaRecorderRef.current?.state === "recording") {
@@ -140,11 +140,11 @@ export default function SpeechTest({
     }
   };
 
-  // --- очистка при размонтировании
   useEffect(() => {
     return () => {
       clearTimer();
-      if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+      if (mediaRecorderRef.current?.state === "recording")
+        mediaRecorderRef.current.stop();
       stopMediaTracks();
     };
   }, []);
@@ -153,32 +153,78 @@ export default function SpeechTest({
   const progressPercent =
     totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
 
+  // === Проверка: это Part 3? ===
+  const isPart3 = partName === "3" || partName.includes("Part 3");
+
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: 16 }}>
       <h2>Part {partName}</h2>
       <h3>{question}</h3>
 
-      {/* картинки */}
-  {pictures && pictures.length > 0 && (
-  <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
-    {pictures.map((src, i) => (
-      <img
-        key={i}
-        src={src}
-        alt={`pic${i}`}
-        style={{
-          width: "200px",
-          height: "auto",
-          borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-        }}
-      />
-    ))}
-  </div>
-)}
+      {/* Картинки */}
+      {pictures && pictures.length > 0 && (
+        <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
+          {pictures.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt={`pic${i}`}
+              style={{
+                width: "200px",
+                height: "auto",
+                borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+              }}
+            />
+          ))}
+        </div>
+      )}
 
+      {/* 🔹 Специальный блок для Part 3 */}
+      {isPart3 && (extraData.For || extraData.Against) && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
+            marginTop: 20,
+          }}
+        >
+          <div
+            style={{
+              border: "2px solid #4caf50",
+              borderRadius: 8,
+              padding: 10,
+              background: "#e8f5e9",
+            }}
+          >
+            <h4>For</h4>
+            <ul>
+              {extraData.For?.map((f, i) => (
+                <li key={i}>{f}</li>
+              ))}
+            </ul>
+          </div>
 
-      {/* прогрессбар */}
+          <div
+            style={{
+              border: "2px solid #f44336",
+              borderRadius: 8,
+              padding: 10,
+              background: "#ffebee",
+            }}
+          >
+            <h4>Against</h4>
+            <ul>
+              {extraData.Against?.map((a, i) => (
+                <li key={i}>{a}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Прогресс-бар */}
       <div
         style={{
           position: "relative",
@@ -217,7 +263,7 @@ export default function SpeechTest({
         </div>
       </div>
 
-      {/* кнопки */}
+      {/* Кнопки */}
       {phase === "idle" && (
         <button
           onClick={() => startPreparation(currentIndex)}

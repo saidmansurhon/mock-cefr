@@ -22,7 +22,7 @@ function App() {
     formData.append("audio", blob, "speech.webm");
     formData.append("sessionId", sessionId);
     formData.append("part", partName);
-    formData.append("qIndex", qIndex); // 👈 теперь передаем номер вопроса
+    formData.append("qIndex", qIndex);
 
     const res = await fetch("http://localhost:5000/api/speech", {
       method: "POST",
@@ -30,9 +30,7 @@ function App() {
     });
 
     const data = await res.json();
-    if (data.final) {
-      setFinalResult(data.final);
-    }
+    if (data.final) setFinalResult(data.final);
   }
 
   function handlePartComplete() {
@@ -56,16 +54,38 @@ function App() {
 
   if (!parts.length) return <p>Загрузка...</p>;
 
+  const part = parts[currentPart];
+  const payload = part.payload || {};
+
+  // 🔹 Универсальная логика для разных структур
+  const questions =
+    payload.questions ||
+    (payload.question ? [payload.question] : []); // если одна фраза (Part 3)
+
+  const pictures = payload.pictures || [];
+
+  // 🔹 Если есть аргументы "For/Against" — добавим их текстом
+  if (payload.For || payload.Against) {
+    questions.push(
+      `Arguments For: ${payload.For?.join(", ") || "none"}`,
+      `Arguments Against: ${payload.Against?.join(", ") || "none"}`
+    );
+  }
+
   return (
-    <SpeechTest
-      partName={parts[currentPart].name}
-      questions={parts[currentPart].payload.questions || []}
-      pictures={parts[currentPart].payload.pictures || []} // 👈 добавил сюда
-      onAnswerComplete={handleAnswer}
-      onPartComplete={handlePartComplete}
-    />
+   <SpeechTest
+  partName={part.name}
+  questions={questions}
+  pictures={pictures}
+  extraData={{
+    For: part.payload.For,
+    Against: part.payload.Against,
+  }}
+  onAnswerComplete={handleAnswer}
+  onPartComplete={handlePartComplete}
+/>
+
   );
 }
 
 export default App;
-
