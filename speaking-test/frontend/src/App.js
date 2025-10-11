@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import SpeechTest from "./SpeechTest";
+import SpeechTest from "./SpeechTestLogic";
 
 function App() {
   const [sessionId, setSessionId] = useState(null);
@@ -13,8 +13,24 @@ function App() {
       .then((data) => {
         setSessionId(data.sessionId);
 
-        // ✅ Просто сохраняем массив частей, как есть
-        setParts(data.parts || []);
+        // ✅ Правильная нормализация структуры частей
+        const formattedParts = (data.parts || []).map((part) => {
+  const payload = part.payload || part; // ✅ добавлено: чтобы брать поля напрямую, если payload нет
+  return {
+    name: part.name,
+    questions: payload.questions || [],
+    pictures: payload.pictures || [],
+    question: payload.question || "", // ✅ теперь Part 3 получит свой вопрос
+    For: payload.For || [],
+    Against: payload.Against || []
+  };
+});
+
+
+
+        setParts(formattedParts);
+        console.log("✅ LOADED PARTS:", formattedParts)
+        
       })
       .catch((err) => console.error("Ошибка загрузки теста:", err));
   }, []);
@@ -32,7 +48,9 @@ function App() {
     });
 
     const data = await res.json();
-    if (data.final) setFinalResult(data.final);
+    if (data.final) {
+      setFinalResult(data.final);
+    }
   }
 
   function handlePartComplete() {
@@ -60,51 +78,17 @@ function App() {
 
   const part = parts[currentPart];
 
-  const payload = part.payload || {};
-
-  // 🔹 Универсальная логика для разных структур
-  const questions =
-    payload.questions ||
-    (payload.question ? [payload.question] : []); // если одна фраза (Part 3)
-
-  const pictures = payload.pictures || [];
-
-  // 🔹 Если есть аргументы "For/Against" — добавим их текстом
-  if (payload.For || payload.Against) {
-    questions.push(
-      `Arguments For: ${payload.For?.join(", ") || "none"}`,
-      `Arguments Against: ${payload.Against?.join(", ") || "none"}`
-    );
-  }
-
-  return (
-   <SpeechTest
-  partName={part.name}
-  questions={questions}
-  pictures={pictures}
-  extraData={{
-    For: part.payload.For,
-    Against: part.payload.Against,
-  }}
-  onAnswerComplete={handleAnswer}
-  onPartComplete={handlePartComplete}
-/>
-
-
-  const payload = part.payload || {}; // 👈 исправление — теперь данные берутся отсюда
-
   return (
     <SpeechTest
       partName={part.name}
-      questions={payload.questions || []}
-      pictures={payload.pictures || []}
-      question={payload.question} // 👈 для Part 3
-      forList={payload.For || []} // 👈 для Part 3
-      againstList={payload.Against || []} // 👈 для Part 3
+      questions={part.questions || []}
+      pictures={part.pictures || []}
+      question={part.question} // 👈 для Part 3
+      forList={part.For || []} // 👈 для Part 3
+      againstList={part.Against || []} // 👈 для Part 3
       onAnswerComplete={handleAnswer}
       onPartComplete={handlePartComplete}
     />
- 
   );
 }
 
