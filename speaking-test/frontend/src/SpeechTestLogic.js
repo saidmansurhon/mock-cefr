@@ -103,10 +103,14 @@ export default function SpeechTest({
 
         const qLen = Array.isArray(questions) ? questions.length : 0;
         if (partName !== "Part 2" && index < qLen - 1) {
-          setCurrentIndex(index + 1);
-        } else {
-          if (onPartComplete) onPartComplete();
-        }
+  setCurrentIndex(index + 1);
+} else {
+  // ✅ Даем серверу 0.5 секунды, чтобы успеть вернуть результат
+  setTimeout(() => {
+    if (onPartComplete) onPartComplete();
+  }, 500);
+}
+
       };
 
       mr.start();
