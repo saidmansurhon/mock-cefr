@@ -40,7 +40,15 @@ export default function SpeechTestUI({
           ))}
         </ul>
       ) : (
-        <h3 style={{ fontSize: 18, fontWeight: 500, marginTop: 8 }}>
+        <h3
+          style={{
+            fontSize: 18,
+            fontWeight: 500,
+            marginTop: 8,
+            whiteSpace: "pre-wrap",
+            lineHeight: 1.4,
+          }}
+        >
           {question ||
             (questions?.length ? questions[currentIndex] : "Вопрос отсутствует")}
         </h3>
@@ -71,8 +79,12 @@ export default function SpeechTestUI({
                 transition: "transform 0.3s",
               }}
               onError={(e) => (e.currentTarget.style.opacity = 0.6)}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.03)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
             />
           ))}
         </div>
@@ -91,11 +103,11 @@ export default function SpeechTestUI({
         >
           <div style={{ flex: 1, minWidth: 200 }}>
             <b>For:</b>
-            <ul>{forList.map((f, i) => <li key={i}>{f}</li>)}</ul>
+            <ul>{forList?.map((f, i) => <li key={i}>{f}</li>)}</ul>
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
             <b>Against:</b>
-            <ul>{againstList.map((a, i) => <li key={i}>{a}</li>)}</ul>
+            <ul>{againstList?.map((a, i) => <li key={i}>{a}</li>)}</ul>
           </div>
         </div>
       )}
@@ -123,7 +135,7 @@ export default function SpeechTestUI({
               cx="70"
               cy="70"
               r="62"
-              stroke={phase === "prep" ? "#ff9800" : "#4caf50"}
+              stroke={phase === "prep" ? "#ff9800" : "#d32f2f"}
               strokeWidth="10"
               fill="none"
               strokeDasharray={2 * Math.PI * 62}
@@ -174,42 +186,24 @@ export default function SpeechTestUI({
       </div>
 
       {/* Кнопки */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
         {phase === "idle" ? (
-          <button
-            onClick={() => startPreparation(currentIndex)}
-            style={{
-              padding: "12px 24px",
-              background: "#1976d2",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 16,
-              cursor: "pointer",
-              transition: "background 0.3s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#1565c0")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#1976d2")}
-          >
+          <button className="wave-btn" onClick={() => startPreparation(currentIndex)}>
             ▶️ Start
           </button>
         ) : (
           <button
+            className={`wave-btn stop-btn ${phase === "answer" ? "recording" : ""}`}
             onClick={manualStop}
-            style={{
-              padding: "12px 24px",
-              background: "#d32f2f",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 16,
-              cursor: "pointer",
-              transition: "background 0.3s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#b71c1c")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#d32f2f")}
           >
             ⏹ Stop
+            {phase === "answer" && (
+              <>
+                <span className="wave"></span>
+                <span className="wave wave2"></span>
+                <span className="wave wave3"></span>
+              </>
+            )}
           </button>
         )}
       </div>
@@ -231,7 +225,7 @@ export default function SpeechTestUI({
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: i === currentIndex ? "#1976d2" : "#ccc",
+                background: i === currentIndex ? "#d32f2f" : "#ccc",
                 transition: "background 0.3s",
               }}
             />
@@ -239,13 +233,78 @@ export default function SpeechTestUI({
         </div>
       )}
 
-      {/* Анимация для записи */}
+      {/* Стили */}
       <style>
         {`
           @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
+          }
+
+          :root {
+            --btn-bg: #d32f2f;
+            --wave-color: rgba(211,47,47,0.25);
+            --wave-color-strong: rgba(211,47,47,0.12);
+          }
+
+          .wave-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 160px;
+            height: 56px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, var(--btn-bg), #9a0007);
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            border: 0;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            overflow: visible;
+            transition: transform 0.1s ease;
+          }
+
+          .wave-btn:active { transform: scale(0.98); }
+
+          /* 🔴 Волны при записи */
+          .recording .wave {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: wave 2.6s cubic-bezier(.25, .8, .25, 1) infinite;
+          }
+
+          .recording .wave {
+            width: 160px;
+            height: 160px;
+            background: var(--wave-color);
+          }
+
+          .recording .wave.wave2 {
+            animation-delay: 0.9s;
+            width: 220px;
+            height: 220px;
+            background: var(--wave-color-strong);
+          }
+
+          .recording .wave.wave3 {
+            animation-delay: 1.8s;
+            width: 300px;
+            height: 300px;
+            background: rgba(211, 47, 47, 0.08);
+          }
+
+          @keyframes wave {
+            0% { transform: translate(-50%, -50%) scale(0.15); opacity: 0.9; }
+            60% { opacity: 0.45; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
           }
         `}
       </style>
