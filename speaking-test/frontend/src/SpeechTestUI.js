@@ -123,9 +123,18 @@ export default function SpeechTestUI({
             className={`wave-btn stop-btn ${phase === "answer" ? "recording" : ""}`}
             onClick={manualStop}
           >
-            ⏹ Stop
             {phase === "answer" && (
               <>
+                {/* 🎤 Микрофон */}
+                <div className="mic-wrapper">
+                  <img
+                    src="/microphone.png"  // 👈 иконку положите в public/
+                    alt="microphone"
+                    className="mic-icon"
+                  />
+                </div>
+
+                {/* 🔴 Волны */}
                 <span className="wave"></span>
                 <span className="wave wave2"></span>
                 <span className="wave wave3"></span>
@@ -160,7 +169,7 @@ export default function SpeechTestUI({
         </div>
       )}
 
-      {/* === Круговой таймер в правом нижнем углу === */}
+      {/* Таймер */}
       <div
         style={{
           position: "fixed",
@@ -246,9 +255,9 @@ export default function SpeechTestUI({
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 160px;
-            height: 56px;
-            border-radius: 999px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             background: linear-gradient(180deg, var(--btn-bg), #9a0007);
             color: white;
             font-weight: 600;
@@ -261,6 +270,25 @@ export default function SpeechTestUI({
           }
 
           .wave-btn:active { transform: scale(0.98); }
+
+          .mic-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: micPulse 1.5s infinite ease-in-out;
+          }
+
+          .mic-icon {
+            width: 40px;
+            height: 40px;
+            
+          }
+
+          @keyframes micPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+          }
 
           /* 🔴 Волны при записи */
           .recording .wave {
