@@ -112,79 +112,6 @@ export default function SpeechTestUI({
         </div>
       )}
 
-      {/* Круговой прогресс-бар */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          margin: "24px 0",
-        }}
-      >
-        <div style={{ position: "relative", width: 140, height: 140 }}>
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle
-              cx="70"
-              cy="70"
-              r="62"
-              stroke="#eee"
-              strokeWidth="10"
-              fill="none"
-            />
-            <circle
-              cx="70"
-              cy="70"
-              r="62"
-              stroke={phase === "prep" ? "#ff9800" : "#d32f2f"}
-              strokeWidth="10"
-              fill="none"
-              strokeDasharray={2 * Math.PI * 62}
-              strokeDashoffset={2 * Math.PI * 62 * (1 - progressPercent / 100)}
-              strokeLinecap="round"
-              style={{
-                transition: "stroke-dashoffset 1s linear, stroke 0.3s ease",
-                transform: "rotate(-90deg)",
-                transformOrigin: "50% 50%",
-              }}
-            />
-          </svg>
-
-          {/* Центр с текстом */}
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-              animation:
-                phase === "answer"
-                  ? "pulse 1s infinite ease-in-out"
-                  : "none",
-            }}
-          >
-            <div style={{ fontSize: 22, fontWeight: "bold" }}>
-              {timeLeft > 0
-                ? formatTime(timeLeft)
-                : phase === "prep"
-                ? "Prep"
-                : phase === "answer"
-                ? "Rec"
-                : "Ready"}
-            </div>
-          </div>
-        </div>
-
-        {/* Название фазы под кругом */}
-        <div style={{ marginTop: 10, fontSize: 15, color: "#555" }}>
-          {phase === "prep"
-            ? "Preparation"
-            : phase === "answer"
-            ? "Recording"
-            : "Idle"}
-        </div>
-      </div>
-
       {/* Кнопки */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
         {phase === "idle" ? (
@@ -232,6 +159,72 @@ export default function SpeechTestUI({
           ))}
         </div>
       )}
+
+      {/* === Круговой таймер в правом нижнем углу === */}
+      <div
+        style={{
+          position: "fixed",
+          right: 24,
+          bottom: 24,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          zIndex: 1000,
+        }}
+      >
+        <div style={{ position: "relative", width: 140, height: 140 }}>
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="62" stroke="#eee" strokeWidth="10" fill="none" />
+            <circle
+              cx="70"
+              cy="70"
+              r="62"
+              stroke={phase === "prep" ? "#ff9800" : "#d32f2f"}
+              strokeWidth="10"
+              fill="none"
+              strokeDasharray={2 * Math.PI * 62}
+              strokeDashoffset={2 * Math.PI * 62 * (1 - progressPercent / 100)}
+              strokeLinecap="round"
+              style={{
+                transition: "stroke-dashoffset 1s linear, stroke 0.3s ease",
+                transform: "rotate(-90deg)",
+                transformOrigin: "50% 50%",
+              }}
+            />
+          </svg>
+
+          {/* Центр с временем */}
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              textAlign: "center",
+              animation:
+                phase === "answer" ? "pulse 1s infinite ease-in-out" : "none",
+            }}
+          >
+            <div style={{ fontSize: 22, fontWeight: "bold" }}>
+              {timeLeft > 0
+                ? formatTime(timeLeft)
+                : phase === "prep"
+                ? "Prep"
+                : phase === "answer"
+                ? "Rec"
+                : "Ready"}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 10, fontSize: 15, color: "#555" }}>
+          {phase === "prep"
+            ? "Preparation"
+            : phase === "answer"
+            ? "Recording"
+            : "Idle"}
+        </div>
+      </div>
 
       {/* Стили */}
       <style>
