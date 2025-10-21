@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import styles from "./SpeechTestUI.module.css";
 
 export default function SpeechTestUI({
-  partName,
   phase,
   timeLeft,
   progressPercent,
@@ -10,178 +10,100 @@ export default function SpeechTestUI({
   currentIndex,
   question,
   pictures,
-  forList,
-  againstList,
   startPreparation,
   manualStop,
+  partName, // 👈 добавляем сюда
 }) {
+  const [fadeClass, setFadeClass] = useState(styles.fadeIn);
+
+  // 🪄 Плавный переход между вопросами
+  useEffect(() => {
+    setFadeClass(styles.fadeOut);
+    const timeout = setTimeout(() => {
+      setFadeClass(styles.fadeIn);
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [currentIndex]);
+
+  // 🧭 Список уровней (должен совпадать с partName в родителе)
+  const levels = ["Part 1.1", "Part 1.2", "Part 2", "Part 3"];
+
   return (
-    <div
-      style={{
-        maxWidth: 720,
-        margin: "0 auto",
-        padding: 16,
-        fontFamily: "system-ui, sans-serif",
-        color: "#222",
-      }}
-    >
-      {/* Заголовок */}
-      <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>
-        {partName}
-      </h2>
-
-      {/* Вопросы */}
-      {partName === "Part 2" ? (
-        <ul style={{ marginTop: 8, paddingLeft: 20 }}>
-          {questions.map((q, i) => (
-            <li key={i} style={{ marginBottom: 4 }}>
-              {q}
-            </li>
+    <div className={styles.container}>
+      {/* 🔝 Верхняя часть: уровни + заголовок */}
+      <div className={styles.topSection}>
+        <div className={styles.levels}>
+          {levels.map((level, idx) => (
+            <div
+              key={idx}
+              className={`${styles.levelBadge} ${
+                partName === level ? styles.activeLevel : styles.pendingLevel
+              }`}
+            >
+              {level.replace("Part ", "")}
+            </div>
           ))}
-        </ul>
-      ) : (
-        <h3
-          style={{
-            fontSize: 18,
-            fontWeight: 500,
-            marginTop: 8,
-            whiteSpace: "pre-wrap",
-            lineHeight: 1.4,
-          }}
-        >
-          {question ||
-            (questions?.length ? questions[currentIndex] : "Вопрос отсутствует")}
-        </h3>
-      )}
+        </div>
 
-      {/* Картинки */}
+        <div className={styles.questionHeader}>
+          QUESTION {currentIndex + 1}
+        </div>
+      </div>
+
+      {/* 📸 Фото */}
       {pictures && pictures.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 16,
-            justifyContent: "center",
-            marginTop: 16,
-          }}
-        >
-          {pictures.map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt={`pic${i}`}
-              style={{
-                width: "200px",
-                height: "auto",
-                borderRadius: 12,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                objectFit: "cover",
-                transition: "transform 0.3s",
-              }}
-              onError={(e) => (e.currentTarget.style.opacity = 0.6)}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
-            />
-          ))}
+        <div className={styles.imageWrapper}>
+          <img
+            src={pictures[currentIndex] || pictures[0]}
+            alt={`question-${currentIndex + 1}`}
+            className={styles.image}
+          />
         </div>
       )}
 
-      {/* Аргументы для Part 3 */}
-      {partName === "Part 3" && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 16,
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <b>For:</b>
-            <ul>{forList?.map((f, i) => <li key={i}>{f}</li>)}</ul>
-          </div>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <b>Against:</b>
-            <ul>{againstList?.map((a, i) => <li key={i}>{a}</li>)}</ul>
-          </div>
-        </div>
-      )}
+      {/* ❓ Вопрос */}
+      <h3 className={`${styles.question} ${fadeClass}`}>
+        {question ||
+          (questions?.length ? questions[currentIndex] : "Вопрос отсутствует")}
+      </h3>
 
-      {/* Кнопки */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+      {/* 🎤 Кнопка */}
+      <div className={styles.buttonWrapper}>
         {phase === "idle" ? (
-          <button className="wave-btn" onClick={() => startPreparation(currentIndex)}>
+          <button
+            className={styles.waveBtn}
+            onClick={() => startPreparation(currentIndex)}
+          >
             ▶️ Start
           </button>
         ) : (
           <button
-            className={`wave-btn stop-btn ${phase === "answer" ? "recording" : ""}`}
+            className={`${styles.waveBtn} ${styles.stopBtn} ${
+              phase === "answer" ? styles.recording : ""
+            }`}
             onClick={manualStop}
           >
             {phase === "answer" && (
               <>
-                {/* 🎤 Микрофон */}
-                <div className="mic-wrapper">
+                <div className={styles.micWrapper}>
                   <img
-                    src="/microphone.png"  // 👈 иконку положите в public/
+                    src="/microphone.png"
                     alt="microphone"
-                    className="mic-icon"
+                    className={styles.micIcon}
                   />
                 </div>
-
-                {/* 🔴 Волны */}
-                <span className="wave"></span>
-                <span className="wave wave2"></span>
-                <span className="wave wave3"></span>
+                <span className={styles.wave}></span>
+                <span className={`${styles.wave} ${styles.wave2}`}></span>
+                <span className={`${styles.wave} ${styles.wave3}`}></span>
               </>
             )}
           </button>
         )}
       </div>
 
-      {/* Индикатор текущего вопроса */}
-      {partName !== "Part 2" && partName !== "Part 3" && (
-        <div
-          style={{
-            marginTop: 12,
-            display: "flex",
-            justifyContent: "center",
-            gap: 6,
-          }}
-        >
-          {questions.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: i === currentIndex ? "#d32f2f" : "#ccc",
-                transition: "background 0.3s",
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Таймер */}
-      <div
-        style={{
-          position: "fixed",
-          right: 24,
-          bottom: 24,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          zIndex: 1000,
-        }}
-      >
-        <div style={{ position: "relative", width: 140, height: 140 }}>
+      {/* 🕒 Таймер */}
+      <div className={styles.timerContainer}>
+        <div className={styles.timerCircle}>
           <svg width="140" height="140" viewBox="0 0 140 140">
             <circle cx="70" cy="70" r="62" stroke="#eee" strokeWidth="10" fill="none" />
             <circle
@@ -202,19 +124,12 @@ export default function SpeechTestUI({
             />
           </svg>
 
-          {/* Центр с временем */}
           <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-              animation:
-                phase === "answer" ? "pulse 1s infinite ease-in-out" : "none",
-            }}
+            className={`${styles.timerCenter} ${
+              phase === "answer" ? styles.pulsing : ""
+            }`}
           >
-            <div style={{ fontSize: 22, fontWeight: "bold" }}>
+            <div className={styles.timerText}>
               {timeLeft > 0
                 ? formatTime(timeLeft)
                 : phase === "prep"
@@ -225,110 +140,7 @@ export default function SpeechTestUI({
             </div>
           </div>
         </div>
-
-        <div style={{ marginTop: 10, fontSize: 15, color: "#555" }}>
-          {phase === "prep"
-            ? "Preparation"
-            : phase === "answer"
-            ? "Recording"
-            : "Idle"}
-        </div>
       </div>
-
-      {/* Стили */}
-      <style>
-        {`
-          @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-          }
-
-          :root {
-            --btn-bg: #d32f2f;
-            --wave-color: rgba(211,47,47,0.25);
-            --wave-color-strong: rgba(211,47,47,0.12);
-          }
-
-          .wave-btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, var(--btn-bg), #9a0007);
-            color: white;
-            font-weight: 600;
-            font-size: 18px;
-            border: 0;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            overflow: visible;
-            transition: transform 0.1s ease;
-          }
-
-          .wave-btn:active { transform: scale(0.98); }
-
-          .mic-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: micPulse 1.5s infinite ease-in-out;
-          }
-
-          .mic-icon {
-            width: 40px;
-            height: 40px;
-            
-          }
-
-          @keyframes micPulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-          }
-
-          /* 🔴 Волны при записи */
-          .recording .wave {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: -1;
-            animation: wave 2.6s cubic-bezier(.25, .8, .25, 1) infinite;
-          }
-
-          .recording .wave {
-            width: 160px;
-            height: 160px;
-            background: var(--wave-color);
-          }
-
-          .recording .wave.wave2 {
-            animation-delay: 0.9s;
-            width: 220px;
-            height: 220px;
-            background: var(--wave-color-strong);
-          }
-
-          .recording .wave.wave3 {
-            animation-delay: 1.8s;
-            width: 300px;
-            height: 300px;
-            background: rgba(211, 47, 47, 0.08);
-          }
-
-          @keyframes wave {
-            0% { transform: translate(-50%, -50%) scale(0.15); opacity: 0.9; }
-            60% { opacity: 0.45; }
-            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-          }
-        `}
-      </style>
     </div>
   );
 }

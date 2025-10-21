@@ -1,0 +1,291 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #222;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+}
+
+/* === ВЕРХНЯЯ СЕКЦИЯ (НОВАЯ ЧАСТЬ) === */
+.topSection {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* === Прогресс уровней === */
+.levels {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.levelBadge {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.activeLevel {
+  background: #2e7d32;
+  color: #fff;
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.pendingLevel {
+  background: #fbc02d;
+  color: #000;
+}
+
+/* === Фото === */
+.imageWrapper {
+  margin-top: 16px;
+}
+
+.image {
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* === Вопрос === */
+.questionHeader {
+  background: #2e7d32;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.question {
+  font-size: 22px;
+  max-width: 500px;
+  margin: 12px auto 0;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  transition: opacity 0.2s ease;
+}
+
+.fadeIn {
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.fadeOut {
+  animation: fadeOut 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* === Кнопка === */
+.buttonWrapper {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: fadeUp 0.4s ease forwards;
+}
+
+/* Анимация появления снизу вверх */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+
+.waveBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #d32f2f, #9a0007);
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  overflow: visible;
+  transition: transform 0.1s ease;
+}
+
+.waveBtn:active {
+  transform: scale(0.98);
+}
+
+.micWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+
+.micIcon {
+  width: 40px;
+  height: 40px;
+}
+
+@keyframes micPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* === Волны === */
+.recording .wave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: wave 2.6s cubic-bezier(.25, .8, .25, 1) infinite;
+}
+
+.wave {
+  width: 160px;
+  height: 160px;
+  background: rgba(211, 47, 47, 0.25);
+}
+
+.wave2 {
+  animation-delay: 0.9s;
+  width: 220px;
+  height: 220px;
+  background: rgba(211, 47, 47, 0.12);
+}
+
+.wave3 {
+  animation-delay: 1.8s;
+  width: 300px;
+  height: 300px;
+  background: rgba(211, 47, 47, 0.08);
+}
+
+@keyframes wave {
+  0% {
+    transform: translate(-50%, -50%) scale(0.15);
+    opacity: 0.9;
+  }
+  60% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* === Таймер === */
+.timerContainer {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+.timerCircle {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.timerCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.pulsing {
+  animation: pulse 1s infinite ease-in-out;
+}
+
+.timerText {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
